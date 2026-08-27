@@ -179,28 +179,30 @@ The project can also be deployed as a static website using GitHub Pages.
 
 ## 🎮 How It Works
 
-```text
-Choose Study Goal
-       ↓
-Choose Focus Duration
-       ↓
-Select Simulated Flight
-       ↓
-Generate Boarding Pass
-       ↓
-Take Off
-       ↓
-Focus Session
-       ↓
-Complete Checklist
-       ↓
-Touchdown
-       ↓
-Earn Miles
-       ↓
-Unlock Destination
-       ↓
+Choose Study Goal  
+↓  
+Choose Focus Duration  
+↓  
+Select Simulated Flight  
+↓  
+Generate Boarding Pass  
+↓  
+Take Off  
+↓  
+Focus Session  
+↓  
+Complete Checklist  
+↓  
+Touchdown  
+↓  
+Earn Miles  
+↓  
+Unlock Destination  
+↓  
 Update Pilot Passport
+
+---
+
 ## 📌 Notes
 
 - Flight routes and flight data are **simulated for demonstration purposes**.
