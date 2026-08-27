@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ODAK AIR - Uçuş Tabanlı Odaklanma Platformu</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- App CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Full Screen Background Map -->
+        <div id="main-map"></div>
+
+        <!-- Screen 1: Flight Selection Overlay -->
+        <div id="screen-selection" class="screen active">
+            <!-- Top Floating Header -->
+            <header class="app-header glass-card">
+                <div class="header-brand">
+                    <h1>ODAK AIR</h1>
+                    <span class="subtitle" data-i18n="subtitle">Odaklan, Uçuşa Geç, Hedeflerine Ulaş!</span>
+                </div>
+                <div class="header-controls">
+                    <button id="btn-lang-toggle" class="icon-btn lang-toggle-btn" title="Dil / Language">EN</button>
+                    <div class="stat"><i class="fa-solid fa-plane-up"></i> <span id="preview-miles">0</span> <span data-i18n="stat_miles">Mil</span></div>
+                    <div class="demo-toggle-container">
+                        <span class="demo-label" data-i18n="demo_mode">Hızlı Uçuş (Demo)</span>
+                        <label class="switch">
+                            <input type="checkbox" id="demo-mode-checkbox">
+                            <span class="slider-switch round"></span>
+                        </label>
+                    </div>
+                    <button id="btn-passport-nav" class="icon-btn" title="Pilot Pasaportu"><i class="fa-solid fa-passport"></i></button>
+                </div>
+            </header>
+            
+            <!-- Left Sidebar Floating Panel -->
+            <div class="sidebar-panel glass-card">
+                <!-- Pre-flight Study Goal Configurator -->
+                <div class="study-config-section">
+                    <div class="input-group">
+                        <label for="study-category"><i class="fa-solid fa-graduation-cap"></i> <span data-i18n="study_category_label">Bugün ne yapacaksın?</span></label>
+                        <select id="study-category" class="custom-select">
+                            <option value="YKS">YKS</option>
+                            <option value="KPSS">KPSS</option>
+                            <option value="LGS">LGS</option>
+                            <option value="Üniversite" data-i18n="cat_University">Üniversite</option>
+                            <option value="İş" data-i18n="cat_Work">İş</option>
+                            <option value="Kitap" data-i18n="cat_Reading">Kitap</option>
+                            <option value="Kodlama" data-i18n="cat_Coding">Kodlama</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="study-subject"><i class="fa-solid fa-pen-nib"></i> <span data-i18n="study_subject_label">Çalışma Konusu</span></label>
+                        <input type="text" id="study-subject" placeholder="Örn: TYT Matematik" class="custom-input" value="TYT Matematik">
+                    </div>
+                </div>
+
+                <!-- Duration Slider Section -->
+                <div class="duration-section">
+                    <div class="slider-header">
+                        <span data-i18n="duration_label">Hedef Odaklanma Süresi</span>
+                        <strong id="selected-duration-label">45 dk</strong>
+                    </div>
+                    <input type="range" id="duration-slider" min="30" max="120" step="5" value="45" class="custom-slider">
+                    <div class="slider-presets">
+                        <button class="preset-btn" data-val="30">30m</button>
+                        <button class="preset-btn active" data-val="45">45m</button>
+                        <button class="preset-btn" data-val="60">60m</button>
+                        <button class="preset-btn" data-val="90">90m</button>
+                        <button class="preset-btn" data-val="120">120m</button>
+                    </div>
+                </div>
+
+                <!-- Flight List Section -->
+                <div class="carousel-section">
+                    <h3><span data-i18n="available_flights">Uçuş Seçenekleri</span> (<span id="carousel-count">0</span>)</h3>
+                    <div class="flight-list-vertical" id="flight-list-vertical">
+                        <!-- Dynamic flight list items will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Sticky Sidebar Footer -->
+                <div class="sidebar-footer">
+                    <button id="btn-generate-boarding-pass" class="primary-btn" disabled><span data-i18n="prepare_boarding_pass">Biniş Kartını Hazırla</span> <i class="fa-solid fa-ticket"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 2: Boarding Pass Modal -->
+        <div id="screen-boarding-pass" class="screen modal-overlay">
+            <div class="modal-card">
+                <header class="app-header minimal">
+                    <button class="back-btn btn-go-selection"><i class="fa-solid fa-chevron-left"></i> <span data-i18n="bp_back_btn">Geri Dön</span></button>
+                    <h2 data-i18n="boarding_pass_title">Biniş Kartı</h2>
+                </header>
+
+                <div class="boarding-pass-wrapper">
+                    <div class="boarding-pass">
+                        <div class="pass-header">
+                            <div class="airline-logo"><i class="fa-solid fa-plane-departure"></i> ODAK AIR</div>
+                            <div class="flight-no">Uçuş: OA-104</div>
+                        </div>
+                        <div class="pass-body">
+                            <div class="route-display">
+                                <div class="city-box">
+                                    <h2 id="bp-dep-code">IST</h2>
+                                    <p id="bp-dep-name">Istanbul</p>
+                                </div>
+                                <div class="plane-divider"><i class="fa-solid fa-plane"></i></div>
+                                <div class="city-box">
+                                    <h2 id="bp-dest-code">ADB</h2>
+                                    <p id="bp-dest-name">Izmir</p>
+                                </div>
+                            </div>
+                            <div class="pass-details">
+                                <div class="detail-item">
+                                    <span data-i18n="bp_purpose_label">Çalışma Amacı</span>
+                                    <strong id="bp-purpose">YKS - TYT Matematik</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span data-i18n="bp_duration_label">Uçuş Süresi (Odak)</span>
+                                    <strong id="bp-time">55 dk</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span data-i18n="bp_class_label">Kabin Sınıfı</span>
+                                    <strong data-i18n="pass_class_val">Odak Sınıfı (Focus Class)</strong>
+                                </div>
+                                <div class="detail-item">
+                                    <span data-i18n="bp_miles_label">Kazanılacak Mil</span>
+                                    <strong id="bp-miles" class="highlight">+210</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pass-footer">
+                            <div class="barcode"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-takeoff" class="primary-btn takeoff-btn"><span data-i18n="bp_takeoff_btn">Uçuşu Başlat (Takeoff)</span> <i class="fa-solid fa-plane-up"></i></button>
+            </div>
+        </div>
+
+        <!-- Screen 3: Focus/Map Floating Overlay (Left Sidebar Focus Console) -->
+        <div id="screen-focus" class="screen focus-screen">
+            <div class="sidebar-panel glass-card focus-sidebar-card">
+                <!-- Branding and Goal -->
+                <div class="study-config-section">
+                    <div class="ife-branding" data-i18n="ife_title">
+                        <i class="fa-solid fa-plane-departure"></i> ODAK AIR Uçuş Bilgi Ekranı
+                    </div>
+                    <div class="ife-goal-tag">
+                        <i class="fa-solid fa-bullseye"></i> <span data-i18n="ife_goal_prefix">Uçuş Amacı: </span><span id="ife-purpose-display">YKS - TYT Matematik</span>
+                    </div>
+                </div>
+
+                <!-- Timer & Progress Section -->
+                <div class="duration-section focus-section-divider">
+                    <div class="progress-header">
+                        <span id="focus-dep" class="airport-code-bold">IST</span>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="flight-progress"></div>
+                            </div>
+                        </div>
+                        <span id="focus-dest" class="airport-code-bold">ADB</span>
+                    </div>
+                    <div class="timer-wrapper">
+                        <div>
+                            <span class="timer-label" data-i18n="ife_time_label">Kalan Süre</span>
+                            <div class="timer focus-timer-clock" id="focus-timer">55:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Checklist Section -->
+                <div class="carousel-section checklist-section-wrapper">
+                    <h3 data-i18n="ife_checklist_title">Görev Listem</h3>
+                    <div class="checklist-input-group">
+                        <input type="text" id="checklist-task-input" placeholder="Görev ekle (örn: 20 soru çöz)" class="checklist-input">
+                        <button id="btn-add-task" class="checklist-add-btn"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <ul class="task-list task-list-scrollable" id="ife-task-list">
+                        <!-- Dynamic task items here -->
+                    </ul>
+                </div>
+
+                <!-- Telemetry Section -->
+                <div class="telemetry-section telemetry-section-divider">
+                    <h3 data-i18n="ife_telemetry_title">Uçuş Durumu</h3>
+                    <div class="telemetry-grid telemetry-grid-layout">
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_phase_label">Aşama</span>
+                            <strong id="tele-phase" class="val-phase telemetry-value-compact">KALKIŞTA</strong>
+                        </div>
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_alt_label">İrtifa</span>
+                            <strong id="tele-altitude" class="telemetry-value-compact">0 ft</strong>
+                        </div>
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_speed_label">Hız</span>
+                            <strong id="tele-speed" class="telemetry-value-compact">0 km/h</strong>
+                        </div>
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_distance_label">Kalan Mesafe</span>
+                            <strong id="tele-distance" class="telemetry-value-compact">0 km</strong>
+                        </div>
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_temp_label">Sıcaklık</span>
+                            <strong id="tele-temp" class="telemetry-value-compact">15 °C</strong>
+                        </div>
+                        <div class="telemetry-item telemetry-item-compact">
+                            <span class="label" data-i18n="ife_seat_label">Koltuk</span>
+                            <strong class="telemetry-value-compact">12A (Focus)</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Abort Button -->
+                <button id="btn-emergency-landing" class="danger-btn abort-button-styled"><span data-i18n="ife_abort_btn">Acil İniş (Abort Flight)</span> <i class="fa-solid fa-parachute-box"></i></button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Arrival Modal -->
+        <div id="screen-arrival" class="screen modal-overlay">
+            <div class="modal-card arrival-card">
+                <div class="arrival-content glass-card large-card text-center">
+                    <div class="success-icon"><i class="fa-solid fa-check-circle"></i></div>
+                    <h2 data-i18n="arr_success_title">İniş Başarılı! (Touchdown)</h2>
+                    <p><span data-i18n="arr_success_desc1">Tebrikler, </span><strong id="arr-dest-name">Izmir</strong><span data-i18n="arr_success_desc2"> şehrine iniş yaptınız. Odaklanma tamamlandı!</span></p>
+                    
+                    <div class="rewards-section">
+                        <h3 data-i18n="arr_summary_title">Uçuş Sonrası Çalışma Raporu</h3>
+                        <div class="reward-item">
+                            <div class="reward-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                            <div class="reward-text">
+                                <strong id="arr-purpose-display">YKS - TYT Matematik</strong>
+                                <span data-i18n="arr_purpose_label">Odaklanılan Konu</span>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div class="reward-icon"><i class="fa-solid fa-list-check"></i></div>
+                            <div class="reward-text">
+                                <strong><span id="arr-tasks-completed">0/0</span> <span data-i18n="arr_tasks_label">Görev Tamamlandı</span></strong>
+                                <span data-i18n="arr_tasks_desc">Uçuşta tamamlanan hedefleriniz</span>
+                            </div>
+                        </div>
+                        <div class="reward-item">
+                            <div class="reward-icon miles-icon"><i class="fa-solid fa-plane-up"></i></div>
+                            <div class="reward-text">
+                                <strong>+<span id="arr-earned-miles">210</span> <span data-i18n="arr_miles_label">Mil Kazanıldı</span></strong>
+                                <span data-i18n="arr_miles_desc">Hesabınıza eklendi</span>
+                            </div>
+                        </div>
+                        <div class="reward-item new-stamp highlight-card">
+                            <div class="reward-icon stamp-icon"><i class="fa-solid fa-stamp"></i></div>
+                            <div class="reward-text">
+                                <strong data-i18n="arr_stamp_label">Yeni Pasaport Damgası!</strong>
+                                <span id="arr-earned-stamp">Izmir Kilidi Açıldı</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="btn-goto-passport" class="secondary-btn"><span data-i18n="arr_passport_btn">Pasaportu Gör</span> <i class="fa-solid fa-passport"></i></button>
+                    <button class="primary-btn btn-go-selection"><span data-i18n="arr_new_flight_btn">Yeni Uçuş Planı</span> <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 5: Passport Modal -->
+        <div id="screen-passport" class="screen modal-overlay">
+            <div class="modal-card passport-card">
+                <header class="app-header minimal passport-header-minimal">
+                    <button class="back-btn btn-go-selection"><i class="fa-solid fa-chevron-left"></i> <span data-i18n="pass_back_btn">Ana Sayfa</span></button>
+                    <h2 data-i18n="pass_title">Pilot Pasaportu</h2>
+                </header>
+                
+                <div class="passport-layout">
+                    <!-- Left Page: Biometric Info -->
+                    <div class="passport-page biometric-page">
+                        <div class="passport-header-emblem">
+                            <i class="fa-solid fa-passport emblem-icon"></i>
+                            <div class="emblem-text" data-i18n="pass_emblem">T.C. ODAK AIR PILOT PASAPORTU</div>
+                        </div>
+                        
+                        <div class="biometric-details">
+                            <div class="biometric-photo">
+                                <i id="passport-rank-icon" class="fa-solid fa-user-astronaut"></i>
+                                <span class="photo-watermark">APPROVED</span>
+                            </div>
+                            <div class="biometric-fields">
+                                <div class="bio-field">
+                                    <span data-i18n="pass_rank_label">RÜTBE / RANK</span>
+                                    <strong id="passport-rank">Öğrenci Pilot</strong>
+                                </div>
+                                <div class="bio-field">
+                                    <span data-i18n="pass_miles_label">TOPLAM MİL / TOTAL MILES</span>
+                                    <strong class="text-gold"><i class="fa-solid fa-plane-up"></i> <span id="passport-total-miles">0</span></strong>
+                                </div>
+                                <div class="bio-field">
+                                    <span data-i18n="pass_flights_label">UÇUŞ SAYISI / FLIGHTS</span>
+                                    <strong id="passport-flights-count">0</strong>
+                                </div>
+                                <div class="bio-field">
+                                    <span data-i18n="pass_class_label">LİSANS SINIFI / CLASS</span>
+                                    <strong data-i18n="pass_class_val">Odak Uçuş Sınıfı (Focus Class)</strong>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="passport-footer-barcode">
+                            <div class="barcode-lines"></div>
+                            <span class="barcode-text">P&lt;TUR&lt;&lt;ODAK&lt;PILOT&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Page: Stamps Grid -->
+                    <div class="passport-page stamps-page">
+                        <h3 data-i18n="pass_unlocked_stamps_title">VİZE DAMGALARI / GİDİLEN ŞEHİRLER</h3>
+                        <div class="stamps-grid" id="stamps-grid">
+                            <!-- Stamps injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,946 @@
+:root {
+    --primary: #4F46E5;
+    --primary-light: #818CF8;
+    --primary-dark: #3730A3;
+    --secondary: #10B981;
+    --bg-dark: #0F172A;
+    --bg-light: #1E293B;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --error: #EF4444;
+    --warning: #F59E0B;
+    --glass-bg: rgba(30, 41, 59, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --gold: #FBBF24;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+}
+
+body {
+    background-color: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    color: var(--text-main);
+}
+
+.app-container {
+    width: 100vw;
+    height: 100vh;
+    background: #0f172a;
+    position: relative;
+    overflow: hidden;
+}
+
+#main-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none; /* Ignore pointer events on screen container itself */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 10;
+}
+
+.screen.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Allow interaction on all child UI components within active screens */
+.screen.active > *, 
+.screen.active .glass-card, 
+.screen.active .sidebar-panel, 
+.screen.active .modal-card,
+.screen.active .preset-btn,
+.screen.active button,
+.screen.active input,
+.screen.active select {
+    pointer-events: auto;
+}
+
+/* Typography & Utilities */
+h1 { font-size: 1.8rem; font-weight: 700; background: linear-gradient(to right, #818CF8, #C084FC); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.1rem; font-weight: 500; color: var(--text-muted); margin-bottom: 12px; }
+.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+.text-center { text-align: center; }
+.mt-auto { margin-top: auto; padding-bottom: 16px; }
+.hidden { display: none !important; }
+
+/* Glassmorphism */
+.glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Study Config Section */
+.study-config-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px;
+}
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.input-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.custom-select, .custom-input {
+    width: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: white;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.3s;
+}
+.custom-select:focus, .custom-input:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 10px rgba(129, 140, 248, 0.2);
+}
+.custom-select option {
+    background: #1e293b;
+    color: white;
+}
+
+/* Floating Headers & Modals */
+.app-header.glass-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    border-radius: 16px;
+    margin-bottom: 0;
+    width: 100%;
+}
+.header-brand {
+    display: flex;
+    flex-direction: column;
+}
+.header-brand h1 {
+    font-size: 1.6rem;
+    line-height: 1.2;
+}
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.header-controls .stat {
+    background: rgba(255,255,255,0.05);
+    padding: 8px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    font-weight: 600;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.minimal { display: flex; align-items: center; gap: 15px; margin-bottom: 20px;}
+
+/* Buttons */
+button { border: none; outline: none; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+.primary-btn { width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; font-size: 1rem; font-weight: 600; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); display: flex; justify-content: center; align-items: center; gap: 10px; }
+.primary-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6); }
+.primary-btn:active:not(:disabled) { transform: translateY(1px); }
+.primary-btn:disabled { background: #334155; color: #64748B; cursor: not-allowed; box-shadow: none; }
+.secondary-btn { width: 100%; padding: 14px; border-radius: 16px; background: rgba(255,255,255,0.1); color: white; border: 1px solid var(--glass-border); font-size: 1rem; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 12px;}
+.danger-btn {width: 100%; padding: 14px; border-radius: 16px; background: rgba(239, 68, 68, 0.1); color: var(--error); border: 1px solid rgba(239, 68, 68, 0.3); font-size: 1rem; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 10px;}
+.danger-btn:hover { background: rgba(239, 68, 68, 0.2); }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); color: white; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; border: 1px solid var(--glass-border); }
+.back-btn { background: transparent; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; gap: 8px; }
+.back-btn:hover { color: white; }
+
+/* Left Sidebar Panel */
+.sidebar-panel {
+    position: absolute;
+    top: 110px;
+    left: 24px;
+    width: 380px;
+    height: calc(100vh - 134px);
+    display: flex;
+    flex-direction: column;
+    z-index: 90;
+    padding: 20px;
+    padding-bottom: 0;
+    overflow-y: auto;
+}
+.sidebar-panel::-webkit-scrollbar {
+    width: 4px;
+}
+.sidebar-panel::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-panel::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+}
+
+/* Individual Sidebar Sections */
+.study-config-section {
+    margin-bottom: 20px;
+}
+.duration-section {
+    margin-bottom: 20px;
+}
+.carousel-section {
+    margin-bottom: 80px; /* Space so list items aren't hidden behind the sticky footer */
+}
+
+/* Sticky Sidebar Footer */
+.sidebar-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    background: linear-gradient(to top, rgba(30, 41, 59, 1) 70%, rgba(30, 41, 59, 0));
+    padding: 20px 0;
+    z-index: 10;
+    flex-shrink: 0;
+}
+
+/* Vertical Flight List */
+.flight-list-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Modals & Overlays */
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+}
+.modal-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg-light);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: 30px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-card.arrival-card {
+    max-width: 520px;
+}
+.modal-card.passport-card {
+    max-width: 900px;
+    height: 85vh;
+    max-height: 650px;
+}
+
+.boarding-pass-wrapper { display: flex; align-items: center; justify-content: center; padding: 10px 0; }
+.boarding-pass { width: 100%; background: #ffffff; border-radius: 20px; overflow: hidden; color: #1e293b; box-shadow: 0 20px 40px rgba(0,0,0,0.4); position: relative; }
+.pass-header { background: var(--primary); padding: 20px; display: flex; justify-content: space-between; color: white; font-weight: 600; }
+.pass-body { padding: 25px; }
+.route-display { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.city-box h2 { font-size: 2.5rem; color: var(--primary-dark); line-height: 1; margin-bottom: 4px; }
+.city-box p { color: #64748B; font-weight: 500; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+.plane-divider { flex: 1; text-align: center; color: #CBD5E1; font-size: 1.5rem; position: relative; margin: 0 15px; }
+.plane-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 2px; border-top: 2px dashed #CBD5E1; z-index: 1; transform: translateY(-50%); }
+.plane-divider i { position: relative; z-index: 2; background: #fff; padding: 0 10px; color: var(--primary); }
+.pass-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.detail-item span { display: block; font-size: 0.75rem; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px; font-weight: 600; letter-spacing: 0.5px; }
+.detail-item strong { display: block; font-size: 1rem; color: #334155; }
+.detail-item strong.highlight { color: #D97706; font-size: 1.1rem; }
+.pass-footer { background: #F1F5F9; padding: 20px; border-top: 2px dashed #CBD5E1; position: relative; }
+.pass-footer::before, .pass-footer::after { content: ''; position: absolute; top: -15px; width: 30px; height: 30px; background: var(--bg-dark); border-radius: 50%; }
+.pass-footer::before { left: -15px; }
+.pass-footer::after { right: -15px; }
+.barcode { height: 40px; background-image: repeating-linear-gradient(to right, #334155, #334155 2px, transparent 2px, transparent 4px, #334155 4px, #334155 5px, transparent 5px, transparent 8px, #334155 8px, #334155 12px, transparent 12px, transparent 15px); opacity: 0.8; }
+.takeoff-btn { background: #10B981; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+.takeoff-btn:hover { box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6); }
+
+/* Focus Screen Overlay widgets (Left Sidebar Focus Console) */
+.focus-screen { padding: 0; pointer-events: none; }
+.focus-sidebar-card {
+    padding-bottom: 20px !important;
+}
+.focus-sidebar-card h3 {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+.ife-branding {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-light);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ife-goal-tag {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10B981;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+}
+.telemetry-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.telemetry-item {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.telemetry-item .label {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+.telemetry-item strong {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: white;
+}
+.telemetry-item .val-phase { color: #3B82F6; }
+.telemetry-item .val-phase.ascending { color: #3B82F6; }
+.telemetry-item .val-phase.cruising { color: #10B981; }
+.telemetry-item .val-phase.descending { color: #F59E0B; }
+
+/* Checklist Pane Styles */
+.checklist-input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.checklist-input {
+    flex: 1;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: white;
+    font-size: 0.85rem;
+    outline: none;
+}
+.checklist-add-btn {
+    background: var(--primary);
+    border: none;
+    color: white;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background 0.2s;
+}
+.checklist-add-btn:hover { background: var(--primary-light); }
+.task-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 4px;
+}
+.task-item {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s;
+}
+.task-item.completed {
+    background: rgba(16, 185, 129, 0.05);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+.task-item span {
+    font-size: 0.85rem;
+    color: white;
+}
+.task-item.completed span {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+.task-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.task-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 4px;
+}
+.task-btn.btn-check { color: var(--text-muted); }
+.task-item.completed .task-btn.btn-check { color: #10B981; }
+.task-btn.btn-delete { color: #EF4444; opacity: 0.6; }
+.task-btn.btn-delete:hover { opacity: 1; }
+
+/* IFE Footer Action Bar */
+.ife-footer {
+    border-top: 1px solid var(--glass-border);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.progress-container .cities {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+.progress-bar-wrapper {
+    flex: 1;
+    margin: 0 16px;
+}
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: #10B981;
+    width: 0%;
+    transition: width 1s linear;
+}
+.timer-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.timer-wrapper {
+    display: flex;
+    flex-direction: column;
+}
+.timer-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+.timer {
+    font-size: 2.2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin-top: 4px;
+}
+
+/* Arrival Screen */
+.large-card { padding: 40px 20px; margin-top: 10px; }
+.success-icon { font-size: 4rem; color: var(--secondary); margin-bottom: 20px; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.rewards-section { margin-top: 30px; text-align: left; }
+.reward-item { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--glass-border); }
+.reward-item.highlight-card { background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
+.reward-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
+.miles-icon { background: rgba(79, 70, 229, 0.2); color: var(--primary-light); }
+.stamp-icon { background: rgba(251, 191, 36, 0.2); color: var(--gold); animation: pulse 2s infinite; }
+.reward-text strong { display: block; font-size: 1.1rem; color: white; margin-bottom: 4px; }
+.reward-text.highlight-card strong { color: var(--gold); }
+.reward-text span { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Passport Layout and Styles */
+.passport-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+}
+.passport-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    padding: 24px;
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+}
+.passport-header-emblem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 2px solid var(--primary-light);
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+}
+.emblem-icon {
+    font-size: 2rem;
+    color: var(--gold);
+}
+.emblem-text {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: var(--text-main);
+}
+.biometric-details {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+.biometric-photo {
+    width: 100px;
+    height: 130px;
+    border: 2px solid var(--glass-border);
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.8rem;
+    color: var(--primary-light);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+}
+.photo-watermark {
+    position: absolute;
+    bottom: 8px;
+    right: -12px;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #10B981;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 2px 12px;
+    transform: rotate(-25deg);
+    letter-spacing: 1px;
+}
+.biometric-fields {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+.bio-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-bottom: 1px dashed rgba(255,255,255,0.06);
+    padding-bottom: 6px;
+}
+.bio-field span {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.bio-field strong {
+    font-size: 0.9rem;
+    color: white;
+}
+.text-gold {
+    color: var(--gold) !important;
+}
+.passport-footer-barcode {
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--glass-border);
+}
+.barcode-lines {
+    height: 20px;
+    background-image: repeating-linear-gradient(to right, var(--text-muted), var(--text-muted) 2px, transparent 2px, transparent 4px, var(--text-muted) 4px, var(--text-muted) 5px, transparent 5px, transparent 7px);
+    opacity: 0.2;
+}
+.barcode-text {
+    font-family: monospace;
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 4px;
+    letter-spacing: 1.5px;
+    text-align: center;
+}
+
+/* Stamps Grid Page */
+.stamps-page {
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.stamps-page h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+}
+.stamps-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    overflow-y: auto;
+    padding-bottom: 10px;
+}
+.stamps-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.stamps-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+.stamps-grid::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 2px;
+}
+
+/* Stamp Graphics Styles */
+.stamp-card {
+    aspect-ratio: 1;
+    background: rgba(255,255,255,0.015);
+    border: 1px dashed rgba(255,255,255,0.06);
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+.stamp-card.unlocked {
+    background: transparent;
+    border: none;
+}
+.stamp-ink-wrap {
+    width: 68px;
+    height: 68px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--stamp-ink);
+    filter: drop-shadow(0 0 1px var(--stamp-ink));
+    transition: transform 0.3s;
+}
+.stamp-ink-border {
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--stamp-ink);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+}
+.stamp-ink-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    line-height: 1;
+}
+.stamp-code {
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+}
+.stamp-ink-icon {
+    font-size: 1rem;
+    margin: 2px 0;
+}
+.stamp-date {
+    font-size: 0.4rem;
+    border: 1px solid var(--stamp-ink);
+    padding: 1px 3px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+}
+
+/* Stamp Shapes */
+.stamp-circle .stamp-ink-border {
+    border-radius: 50%;
+}
+.stamp-hex .stamp-ink-border {
+    clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+    border-radius: 0;
+}
+.stamp-oval .stamp-ink-border {
+    border-radius: 50% / 35%;
+}
+.stamp-square .stamp-ink-border {
+    border-radius: 8px;
+}
+.stamp-shield .stamp-ink-border {
+    border-radius: 0 0 12px 12px;
+}
+.stamp-oct .stamp-ink-border {
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    border-radius: 0;
+}
+
+/* Locked Stamp Graphics */
+.stamp-locked-graphic {
+    width: 68px;
+    height: 68px;
+    border: 2px dashed rgba(255,255,255,0.06);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: rgba(255,255,255,0.15);
+}
+.stamp-lock-icon {
+    font-size: 1rem;
+}
+.stamp-code-locked {
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 2px;
+    color: rgba(255,255,255,0.2);
+}
+.stamp-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 6px;
+    text-align: center;
+}
+.stamp-card.unlocked .stamp-name {
+    color: var(--stamp-ink);
+    opacity: 0.8;
+}
+
+/* Custom Leaflet Map Dark Mode and Airplane Icon */
+.leaflet-container { background: #0f172a; }
+.leaflet-tile { filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%); }
+.airplane-marker { color: white; font-size: 24px; text-shadow: 0 0 10px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; transition: transform 0.1s linear; }
+
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideDown { from { transform: translateY(-30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes bounceIn { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(251, 191, 36, 0); } 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); } }
+
+/* Header Controls & Demo Mode Switch */
+.header-controls { display: flex; align-items: center; gap: 16px; }
+.demo-toggle-container { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 12px; border: 1px solid var(--glass-border); }
+.demo-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Switch Styling */
+.switch { position: relative; display: inline-block; width: 34px; height: 20px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider-switch { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #475569; transition: .3s; border-radius: 20px; }
+.slider-switch:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+input:checked + .slider-switch { background-color: var(--secondary); }
+input:checked + .slider-switch:before { transform: translateX(14px); }
+
+/* Duration Section & Custom Slider */
+.duration-section { padding: 8px 0; }
+.slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.slider-header span { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+.slider-header strong { font-size: 1.2rem; color: var(--primary-light); font-weight: 700; }
+.custom-slider { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.1); outline: none; margin-bottom: 16px; }
+.custom-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--primary-light); cursor: pointer; box-shadow: 0 0 10px var(--primary); transition: transform 0.1s; }
+.custom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+.slider-presets { display: flex; justify-content: space-between; gap: 6px; }
+.preset-btn { flex: 1; padding: 6px; font-size: 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-muted); transition: all 0.2s; }
+.preset-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.preset-btn.active { background: var(--primary); border-color: var(--primary-light); color: white; font-weight: 600; }
+
+/* Carousel/Vertical List Section */
+.carousel-section { display: flex; flex-direction: column; gap: 8px; }
+.carousel-section h3 { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Flight Card */
+.flight-card { width: 100%; flex-shrink: 0; background: rgba(30, 41, 59, 0.4); border: 1px solid var(--glass-border); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.flight-card:hover { background: rgba(30, 41, 59, 0.6); border-color: rgba(129, 140, 248, 0.4); transform: translateY(-2px); }
+.flight-card.selected { background: rgba(79, 70, 229, 0.25); border-color: var(--primary-light); box-shadow: 0 0 15px rgba(79, 70, 229, 0.3); transform: scale(1.02); }
+.card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 6px; }
+.airline-badge { font-size: 0.65rem; font-weight: 700; color: var(--primary-light); background: rgba(129, 140, 248, 0.1); padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.flight-no-badge { font-size: 0.65rem; color: var(--text-muted); font-weight: 500; }
+.card-body { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+.airport-box { display: flex; flex-direction: column; }
+.airport-box .code { font-size: 1.2rem; font-weight: 700; color: white; line-height: 1.1; }
+.airport-box .city { font-size: 0.65rem; color: var(--text-muted); }
+.route-arrow { color: var(--text-muted); font-size: 0.8rem; opacity: 0.6; }
+.card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; font-size: 0.75rem; }
+.duration-tag { color: white; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+.duration-tag i { color: var(--primary-light); }
+.miles-tag { color: var(--gold); font-weight: 700; display: flex; align-items: center; gap: 2px; }
+
+/* Empty State Card */
+.empty-flights { width: 100%; text-align: center; padding: 24px 12px; color: var(--text-muted); font-size: 0.85rem; border: 1px dashed rgba(255,255,255,0.1); border-radius: 16px; background: rgba(255,255,255,0.01); display: flex; flex-direction: column; align-items: center; gap: 8px; justify-content: center; }
+.empty-flights i { font-size: 1.5rem; color: var(--text-muted); opacity: 0.5; }
+
+/* Active Airplane Radar Pulse ripple */
+.radar-pulse {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border: 2px solid #10B981;
+    border-radius: 50%;
+    pointer-events: none;
+    animation: radarRipple 2s infinite ease-out;
+}
+
+@keyframes radarRipple {
+    0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 1;
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(2.2);
+        opacity: 0;
+    }
+}
+
+/* Utility Classes for Inline Style Cleanup */
+.lang-toggle-btn {
+    font-weight: 700;
+    font-size: 0.95rem;
+    border-radius: 12px;
+    width: 48px;
+}
+.ife-goal-tag {
+    margin-top: 8px;
+}
+.focus-section-divider {
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.airport-code-bold {
+    font-weight: 700;
+}
+.focus-sidebar-card .progress-bar-wrapper {
+    flex: 1;
+    margin: 0 12px;
+}
+.timer-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+}
+.focus-timer-clock {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+.checklist-section-wrapper {
+    margin-bottom: 16px;
+}
+.task-list-scrollable {
+    max-height: 180px;
+    overflow-y: auto;
+}
+.telemetry-section-divider {
+    border-top: 1px solid var(--glass-border);
+    padding-top: 16px;
+    margin-bottom: 16px;
+}
+.telemetry-grid-layout {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+.telemetry-item-compact {
+    padding: 6px 10px;
+}
+.telemetry-item-compact .label {
+    font-size: 0.6rem;
+}
+.telemetry-value-compact {
+    font-size: 0.85rem;
+}
+.abort-button-styled {
+    margin-top: auto;
+    padding: 12px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+.passport-header-minimal {
+    margin-bottom: 12px;
+}

@@ -1,0 +1,16 @@
+# System Files
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Antigravity Scratch and Config folders
+.gemini/
+scratch/
+test_dom_linker.py
+run_unit_tests.js
+
+# Node/Build dependencies (if any added later)
+node_modules/
+dist/
+build/
+*.log
