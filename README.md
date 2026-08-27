@@ -1,77 +1,230 @@
-# ✈️ ODAK AIR - Simulated Flight-Based Gamified Focus Platform
+# ✈️ ODAK AIR — Gamified Focus Platform
 
-**ODAK AIR** is a responsive, gamified focus (Pomodoro/Focus) web application designed for students and professionals. By mapping study durations to **simulated domestic flight routes** within Turkey under a single brand identity, it converts traditional study intervals into immersive flights. 
+**ODAK AIR** is a desktop web application that transforms focused study sessions into simulated domestic flights across Turkey.
 
-The application is built entirely as a client-side web application with zero backend dependencies, utilizing a dark glassmorphic design, dynamic leaflet mapping, real-time simulated telemetry, and a physical booklet-style passport aesthetic log.
+Instead of using a traditional countdown timer, users select a focus duration and a study goal, choose a simulated flight route, receive a boarding pass, and begin their focus session as a flight.
+
+The experience combines **productivity, gamification, interactive maps, simulated flight telemetry, and progress tracking** into a single interface.
 
 ---
 
-## 📸 Interface Preview / Ekran Görüntüsü
+## 📸 Interface Preview
 
 ![ODAK AIR Interface](screenshot.png)
-*(To display your interface on GitHub, capture a browser screenshot and save it as `screenshot.png` in the root folder.)*
 
 ---
 
-## 🌟 English Description & Developer Documentation
+## 💡 Concept
 
-### 1. Concept
-Instead of selecting a generic countdown timer, the user sets their target focus duration (30 - 120 minutes). The system dynamically filters and displays **simulated flight routes** whose durations match the selected target (e.g., IST ➔ ESB for a 60-minute session). Once the user fills out their boarding pass and "takes off," the dashboard transitions into a flight deck cockpit, displaying study progress, checklist objectives, and live flight telemetry until touchdown.
+ODAK AIR was designed around a simple idea:
 
-### 2. Technical Architecture & State Design
-The project adheres to a clean monolithic design separating layout, presentation, and behavior:
-* **UI Presentation**: Fluid CSS layouts using custom CSS variables, flexbox, grid systems, and a modern dark glassmorphism overlay.
-* **State Management**: A centralized, mutable state engine (`currentState`) in Vanilla JS tracking flight telemetries, checklists, active markers, language states, and timing sequences.
-* **Storage Persistence**: Uses HTML5 LocalStorage for logs. Encapsulated in try/catch defensive wrappers to ensure stability even if localStorage is corrupted.
-* **Localization Engine (i18n)**: Single-page dynamic language toggle engine utilizing `data-i18n` attributes and a DOM walker. Includes localized study categories (`getLocalizedCategory`).
+> **What if focusing on a task felt like taking a flight toward a destination?**
 
-### 3. Key Features & Implementation Details
-* **🗺️ Real-Time Leaflet.js Tracking**: Plots simulated route vectors dynamically. Draws active flights with a custom pulsing SVG aircraft marker, mathematically calculated to face the correct destination heading angle. Fully compliant with OpenStreetMap tile attribution requirements.
-* **🧭 Cockpit Telemetry Simulation**: Simulates linear flight telemetry (Altitude, Ground Speed, Outside Temperature, Distance Remaining) mapped across three simulated flight phases: Climb, Cruise, and Descent.
-* **🛂 Passport-Themed Logbook UI**: Redesigned into a grid-based layout mimicking a physical dual-page passport. Unlocked cities are stamped onto the right page with city-specific ink stamps, icons, pseudo-random rotations, and custom colors.
-* **📝 In-Flight Checklist**: Allows adding and tracking study objectives in real-time.
+Users choose a study category, enter their subject, and select a target focus duration between **30 and 120 minutes**.
 
-### 4. Tech Stack
-* **Markup & Semantics**: HTML5 (structured semantic tags)
-* **Styling & Layout**: CSS3 (custom variables, keyframes, transitions, responsive grid/flexbox)
-* **Logic & Leaflet Map**: Vanilla ES6+ JavaScript, Leaflet.js, OpenStreetMap API
-* **Icons & Typography**: Font Awesome 6.0, Google Fonts (Plus Jakarta Sans, JetBrains Mono)
-* **Testing Utilities**: Node.js & Python scripts for DOM checking and syntax verification
+The application then filters simulated flight routes that match the selected duration.
 
-### 5. How to Run Locally
-Since the application has no server dependencies, running it is simple:
-1. Clone or download this repository.
-2. Open `index.html` directly in any web browser.
-3. Switch languages dynamically via the **TR/EN** button in the header.
+Once a flight is selected, the user receives a boarding pass and starts the focus session.
+
+During the flight, the interface displays:
+
+- Focus countdown
+- Study progress
+- Interactive flight route
+- Simulated aircraft movement
+- Flight phase
+- Altitude
+- Ground speed
+- Outside temperature
+- Remaining distance
+- Personal checklist
+
+After completing the session, the user earns miles and unlocks the destination in their pilot passport.
 
 ---
 
-## 🇹🇷 Türkçe Açıklama ve Geliştirici Dokümantasyonu
+## ✨ Key Features
 
-### 1. Konsept
-Kullanıcı sıradan bir geri sayım sayacı kurmak yerine, odaklanmak istediği süreyi seçer (30 - 120 dakika). Sistem, bu süreye uygun **simüle edilmiş Türkiye içi uçuş rotalarını** listeler (örn: 60 dakikalık çalışma için İstanbul ➔ Ankara uçuşu). Kullanıcı biniş kartını alıp "kalkış" yaptığında ekran uçuş kokpitine dönüşür; çalışma süresi boyunca uçuş telemetrilerini, canlı harita takibini ve çalışma hedeflerini simüle eder.
+### ✈️ Flight-Based Focus Sessions
 
-### 2. Teknik Mimari ve Durum Yönetimi
-Proje, HTML (Yapı), CSS (Görünüm) ve JS (Davranış) katmanlarını kesin çizgilerle birbirinden ayıracak şekilde yapılandırılmıştır:
-* **Arayüz Tasarımı**: CSS özel değişkenleri (variables), CSS Keyframes animasyonları ve cam efekti (glassmorphism) kullanan responsive tasarım.
-* **Durum Yönetimi (State)**: Vanilla JS üzerinde tekil ve merkezi bir nesne (`currentState`) ile yönetilen telemetri, zamanlayıcı, dil ve harita durumları.
-* **Veri Güvenliği**: Tarayıcı yerel depolama (`localStorage`) okuma/yazma süreçleri try/catch blokları ile sarmalanarak çerez bozulmalarına karşı korumalı hale getirilmiştir.
-* **Dil Motoru (i18n)**: Sayfa yenilenmeden tüm kelime, input placeholder'ları ve kategorileri dinamik olarak çeviren yerelleştirme motoru.
+Focus durations are represented as simulated domestic flights.
 
-### 3. Öne Çıkan Özellikler
-* **🗺️ Leaflet.js Harita Entegrasyonu**: Uçuş rotasını Leaflet.js ile harita üzerinde vektörel olarak çizer. Simüle uçak ikonu, kalkış ve varış koordinatları arasındaki açıya göre dinamik olarak yönlendirilir (rotaya bakar). OpenStreetMap telif hakları ile tam uyumludur.
-* **🧭 Kokpit Telemetri Simülasyonu**: Çalışma süresine bağlı olarak uçağın tırmanış, düz uçuş ve alçalış aşamalarındaki irtifa (ft/m), hız (km/h), sıcaklık (°C) ve kalan mesafesini doğrusal aşama modelleriyle simüle eder.
-* **🛂 Pilot Pasaportu ve Vize Damgaları**: Kitapçık şeklinde tasarlanmış, iki sayfalık biyometrik pasaport estetiğine sahip kayıt günlüğü (logbook) ekranı. Kazanılan millere göre rütbe sistemi ve gidilen şehirlere ait özel retro vize damgaları (her şehre özel ikon, ink rengi ve rastgele mühür dönüş açısı).
-* **📝 Uçuş Checklist**: Çalışma esnasında yapılacak görevlerin eklenebildiği görev takip listesi.
+Users can select routes based on their desired focus duration and begin a session through a boarding-pass interface.
 
-### 4. Kullanılan Teknolojiler
-* **HTML5 & CSS3**: Semantik yapılar ve modern gölgelendirmeler/geçiş efektleri.
-* **Leaflet.js & OpenStreetMap**: Harita entegrasyonu (API Key gerektirmez).
-* **Font Awesome & Google Fonts**: Modern simgeler ve kod blokları fontları.
-* **Node.js & Python**: Kod kalitesi ve statik bağdaştırma analiz araçları.
+### 🗺️ Interactive Flight Map
 
-### 5. Yerel Kurulum
-Uygulama tamamen statik dosyalardan oluştuğu için:
-1. Bu projeyi bilgisayarınıza indirin.
-2. `index.html` dosyasına çift tıklayarak tarayıcınızda açın.
-3. Çalışmanızı başlatıp sağ üstteki **TR/EN** butonu ile diller arası geçişi test edin.
+The application uses **Leaflet.js** and OpenStreetMap tiles to visualize flight routes across Turkey.
+
+The aircraft marker moves along the selected route and dynamically rotates toward the destination.
+
+### 🧭 Simulated Flight Telemetry
+
+The focus session is divided into three simulated flight phases:
+
+- **Climb**
+- **Cruise**
+- **Descent**
+
+Telemetry values such as altitude, ground speed, temperature, and remaining distance are calculated dynamically throughout the session.
+
+### 📝 In-Flight Checklist
+
+Users can create personal tasks for their focus session and mark them as completed while the flight is in progress.
+
+### 🛂 Pilot Passport
+
+Completed flights contribute to a personal passport-style progress log.
+
+Users can:
+
+- Earn miles
+- Increase their pilot rank
+- Unlock destination cities
+- Collect city-specific stamps
+
+### 🌍 Turkish / English Interface
+
+The application includes a dynamic TR/EN localization system.
+
+The interface, placeholders, labels, and study categories can be switched without reloading the page.
+
+### ⚡ Demo Mode
+
+A fast-flight demo mode allows the complete focus-flight experience to be demonstrated without waiting for the full session duration.
+
+### 💾 Local Persistence
+
+User progress such as earned miles and unlocked destinations is stored using browser `localStorage`.
+
+---
+
+## 🧩 Technical Architecture
+
+ODAK AIR is built as a client-side web application with no backend.
+
+### State Management
+
+Application state is centralized in a `currentState` object that manages:
+
+- Current flight
+- Destination and departure
+- Focus timer
+- Checklist
+- Flight progress
+- Map markers
+- Telemetry
+- Language
+- Session status
+
+### Localization
+
+The localization system uses:
+
+- `data-i18n` attributes
+- A centralized translation object
+- Dynamic DOM updates
+- Localized study categories
+
+### Flight Simulation
+
+Flight routes are represented using simulated flight data.
+
+The application calculates:
+
+- Route distance
+- Aircraft position
+- Heading
+- Flight progress
+- Remaining distance
+- Simulated telemetry values
+
+### Data Persistence
+
+`localStorage` is used to persist user progress between browser sessions.
+
+Storage operations are wrapped with defensive `try/catch` handling.
+
+---
+
+## 🛠️ Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **HTML5** | Application structure and semantic markup |
+| **CSS3** | Layout, styling, animations and glassmorphism UI |
+| **Vanilla JavaScript (ES6+)** | Application logic, state management and simulation |
+| **Leaflet.js** | Interactive map and route visualization |
+| **OpenStreetMap** | Map tiles |
+| **Font Awesome** | Interface icons |
+| **Google Fonts (Inter)** | Typography |
+| **localStorage** | Client-side progress persistence |
+
+---
+
+## 🚀 Running the Project
+
+No backend or build process is required.
+
+### Option 1 — Open locally
+
+1. Clone the repository.
+2. Open `index.html` in a modern web browser.
+3. Start planning a focus flight.
+
+### Option 2 — GitHub Pages
+
+The project can also be deployed as a static website using GitHub Pages.
+
+---
+
+## 🎮 How It Works
+
+```text
+Choose Study Goal
+       ↓
+Choose Focus Duration
+       ↓
+Select Simulated Flight
+       ↓
+Generate Boarding Pass
+       ↓
+Take Off
+       ↓
+Focus Session
+       ↓
+Complete Checklist
+       ↓
+Touchdown
+       ↓
+Earn Miles
+       ↓
+Unlock Destination
+       ↓
+Update Pilot Passport
+## 📌 Notes
+
+- Flight routes and flight data are **simulated for demonstration purposes**.
+- Telemetry values are also simulated and are not intended to represent real-time aviation data.
+- User progress is stored locally in the browser and is not synchronized across devices.
+- The application is designed as a desktop-first web experience.
+
+---
+
+## 🔮 Possible Future Improvements
+
+Potential future iterations could include:
+
+- Real-time flight data integration
+- User accounts and cloud-based progress synchronization
+- More destinations and international routes
+- Additional gamification mechanics
+- Focus session statistics and analytics
+- Achievement and milestone systems
+
+---
+
+## 👩‍💻 About the Project
+
+ODAK AIR was developed as a personal project exploring the intersection of **productivity, gamification, interface design, and interactive web development**.
+
+The project focuses on turning a familiar productivity tool into a more engaging and immersive user experience.
